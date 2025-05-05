@@ -1,14 +1,14 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private jwtService: JwtService,
-    private usersService: UsersService,
+    private jwtService: JwtService, // Убедитесь, что JwtService указан
+    private usersService: UsersService, // Убедитесь, что UsersService указан
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

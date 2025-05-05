@@ -20,8 +20,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // Запуск сервера
-  await app.listen(3000);
-  console.log(`Сервер запущен на http://localhost:3000`);
+  // Запуск сервера на всех интерфейсах (0.0.0.0)
+  const port = 3000;
+  await app.listen(port, '0.0.0.0');
+  console.log(`Сервер запущен на http://localhost:${port}`);
+  console.log(`Сервер также доступен по ZeroTier IP: http://192.168.195.168:${port}`);
+  console.log(`Swagger UI доступен по адресу: http://192.168.195.168:${port}/api`);
 }
 bootstrap();
