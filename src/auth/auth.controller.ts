@@ -1,19 +1,25 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Body } from '@nestjs/common';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+
+import { UserEntity } from '../users/entities/user.entity';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
+import { LocalAuthGuard } from './guards/local.guard';
 
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
-
-  @Post('register')
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
-  }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  @UseGuards(LocalAuthGuard)
+  @ApiBody({ type: CreateUserDto })
+  async login(@Request() req) {
+    return this.authService.login(req.user as UserEntity);
+  }
+
+  @Post('register')
+  register(@Body() dto: CreateUserDto) {
+    return this.authService.register(dto);
   }
 }

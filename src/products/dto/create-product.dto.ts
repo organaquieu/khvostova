@@ -1,15 +1,28 @@
-import { IsString, IsNumber, IsUrl } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNumber, IsNumberString, IsEnum } from 'class-validator';
+import { ProductType } from '../product.entity';
 
 export class CreateProductDto {
-  @IsString()
-  name: string;
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Загружаемое изображение продукта',
+  })
+  // image: Express.Multer.File; // Это будет тип, который вы используете в контроллере
 
   @IsString()
-  description: string;
+  name: string = 'Название изделия';
 
-  @IsNumber()
-  price: number;
+  @IsString()
+  description: string = 'Описание';
 
-  @IsUrl()
-  imageUrl: string;
+  @IsString()
+  prices: string = 'цена..';
+
+  @IsNumberString()
+  categoryId: number;
+
+  @IsEnum(ProductType)
+  @ApiProperty({ enum: ProductType, enumName: 'ProductType' })
+  productType: ProductType;
 }

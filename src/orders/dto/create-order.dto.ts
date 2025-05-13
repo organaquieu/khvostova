@@ -1,4 +1,4 @@
-import { IsNumber } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateOrderDto {
   @IsNumber()
@@ -9,4 +9,8 @@ export class CreateOrderDto {
 
   @IsNumber()
   quantity: number;
+
+  @IsOptional()
+  @IsString()
+  customSize?: string; // Для индивидуальных размеров
 }

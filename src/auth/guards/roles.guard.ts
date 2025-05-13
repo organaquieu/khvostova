@@ -1,36 +1,24 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../../users/users.service';
+import { UserRole } from '../../users/entities/user.entity';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(
-    private reflector: Reflector,
-    private jwtService: JwtService, // Убедитесь, что JwtService указан
-    private usersService: UsersService, // Убедитесь, что UsersService указан
-  ) {}
+  constructor(private reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const roles = this.reflector.get<string[]>('roles', context.getHandler());
-    if (!roles) {
-      return true; // Если роли не указаны, доступ разрешён
+  canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.get<UserRole[]>(
+      'roles',
+      context.getHandler(),
+    );
+    
+    if (!requiredRoles) {
+      return true;
     }
-
+    
     const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization?.split(' ')[1];
-
-    if (!token) {
-      return false; // Токен отсутствует
-    }
-
-    const payload = this.jwtService.verify(token);
-    const user = await this.usersService.findOne(payload.sub);
-
-    if (!user) {
-      return false; // Пользователь не найден
-    }
-
-    return roles.includes(user.role); // Проверяем, есть ли роль у пользователя
+    const user = request.user;
+    
+    return requiredRoles.includes(user.role);
   }
 }

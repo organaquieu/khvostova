@@ -1,25 +1,27 @@
-import { Injectable } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { PassportStrategy } from '@nestjs/passport';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private usersService: UsersService) {
+  constructor(private readonly userService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'your_secret_key', // Замените на настоящий секретный ключ
+      secretOrKey: process.env.JWT_SECRET as string,
     });
   }
 
-  async validate(payload: JwtPayload) {
-    //return this.usersService.findOne(payload.sub);
-    const user = await this.usersService.findOne(payload.sub); // Используем findOne
+  async validate(payload: { id: string }) {
+    const user = await this.userService.findById(+payload.id);
+
     if (!user) {
-      throw new Error('Пользователь не найден');
+      throw new UnauthorizedException('У вас нет доступа');
     }
-    return user;
+
+    return {
+      id: user.id,
+    };
   }
 }
